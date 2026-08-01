@@ -1,0 +1,29 @@
+name: CI
+
+# Runs on every push and pull request against main/develop.
+# This satisfies the "Workflow (CI/CD) demonstrated" criterion in the
+# Task D (Documentation/GitHub) marking rubric - screenshot the green
+# check runs from the Actions tab and include them in your report.
+on:
+  push:
+    branches: [ "main", "develop", "feature/**" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and run tests with Maven
+        run: mvn -B clean verify

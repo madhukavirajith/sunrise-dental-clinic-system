@@ -1,0 +1,6 @@
+# Copy this file to db.properties (same folder) and fill in your local
+# XAMPP/WAMPP MySQL credentials. db.properties is git-ignored on purpose -
+# never commit real credentials to a public repository.
+db.url=jdbc:mysql://localhost:3306/sunrise_dental_clinic?useSSL=false&serverTimezone=UTC
+db.username=root
+db.password=

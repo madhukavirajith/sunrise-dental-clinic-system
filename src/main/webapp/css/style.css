@@ -1,0 +1,24 @@
+/* Minimal baseline styling only - the brief explicitly does not expect a
+   complex frontend; effort should go into backend design/architecture. */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 640px;
+    margin: 40px auto;
+    padding: 0 16px;
+    color: #222;
+}
+
+h1 {
+    color: #1b6f6f;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 320px;
+}
+
+.error {
+    color: #b00020;
+}
