@@ -7,16 +7,6 @@ import dentalclinic.util.DBConnectionManager;
 import java.sql.*;
 import java.util.Optional;
 
-/**
- * DAO PATTERN (implementation half). Talks to MySQL via plain JDBC only -
- * no ORM framework, consistent with the "no third-party frameworks"
- * constraint (a JDBC driver is an allowed database dependency, not a
- * framework).
- *
- * TODO (student): this is a skeleton showing the pattern and the SQL
- * shape expected - extend with update()/delete() and proper exception
- * handling/logging as you build out the feature.
- */
 public class PatientDAOImpl implements PatientDAO {
 
     @Override
@@ -59,5 +49,37 @@ public class PatientDAOImpl implements PatientDAO {
             }
         }
         return Optional.empty();
+    }
+    @Override
+    public void update(Patient patient) throws SQLException {
+        String sql = "UPDATE patient SET name = ?, address = ?, contact_number = ? WHERE patient_id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, patient.getName());
+            ps.setString(2, patient.getAddress());
+            ps.setString(3, patient.getContactNumber());
+            ps.setInt(4, patient.getPatientId());
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("No patient found with id " + patient.getPatientId() + " to update");
+            }
+        }
+    }
+
+    @Override
+    public void delete(int patientId) throws SQLException {
+        String sql = "DELETE FROM patient WHERE patient_id = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, patientId);
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("No patient found with id " + patientId + " to delete");
+            }
+        }
     }
 }
