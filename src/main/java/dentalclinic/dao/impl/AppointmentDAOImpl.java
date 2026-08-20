@@ -32,8 +32,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
         try (Connection conn = DBConnectionManager.getInstance().getConnection()) {
             conn.setAutoCommit(false); // start a transaction - explained below
             try {
-                // Step A: insert with a temporary placeholder number (the column
-                // is NOT NULL + UNIQUE, so we can't insert an empty value here)
+
                 String placeholder = "PENDING-" + System.nanoTime();
                 try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, placeholder);
@@ -52,8 +51,6 @@ public class AppointmentDAOImpl implements AppointmentDAO {
                     }
                 }
 
-                // Step B: now that we know the generated ID, build the real
-                // number and update the row to use it instead of the placeholder
                 String realNumber = String.format("APT-%06d", appointment.getAppointmentId());
                 try (PreparedStatement ps2 = conn.prepareStatement(
                         "UPDATE appointment SET appointment_number = ? WHERE appointment_id = ?")) {
@@ -63,9 +60,9 @@ public class AppointmentDAOImpl implements AppointmentDAO {
                 }
                 appointment.setAppointmentNumber(realNumber);
 
-                conn.commit(); // both steps succeeded - make them permanent together
+                conn.commit();
             } catch (SQLException e) {
-                conn.rollback(); // something failed - undo Step A too, don't leave a half-finished row
+                conn.rollback();
                 throw e;
             } finally {
                 conn.setAutoCommit(true);
