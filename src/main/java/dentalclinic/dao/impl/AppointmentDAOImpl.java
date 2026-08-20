@@ -33,7 +33,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
             conn.setAutoCommit(false); // start a transaction - explained below
             try {
 
-                String placeholder = "PENDING-" + System.nanoTime();
+                String placeholder = "P" + (System.nanoTime() % 10_000_000_000L);
                 try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, placeholder);
                     ps.setInt(2, appointment.getPatient().getPatientId());
