@@ -1,5 +1,4 @@
-/* Minimal baseline styling only - the brief explicitly does not expect a
-   complex frontend; effort should go into backend design/architecture. */
+
 body {
     font-family: Arial, Helvetica, sans-serif;
     max-width: 640px;
@@ -21,4 +20,14 @@ form {
 
 .error {
     color: #b00020;
+}
+
+form label {
+    margin-top: 10px;
+    font-weight: bold;
+}
+form .error {
+    color: #b00020;
+    font-size: 0.85em;
+    min-height: 1em;
 }
