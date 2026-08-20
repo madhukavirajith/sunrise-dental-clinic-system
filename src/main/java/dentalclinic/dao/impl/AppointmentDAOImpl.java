@@ -25,25 +25,50 @@ public class AppointmentDAOImpl implements AppointmentDAO {
 
     @Override
     public Appointment save(Appointment appointment) throws SQLException {
-        String sql = "INSERT INTO appointment " +
+        String insertSql = "INSERT INTO appointment " +
                 "(appointment_number, patient_id, dentist_id, treatment_type_id, appointment_date, appointment_time, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, appointment.getAppointmentNumber());
-            ps.setInt(2, appointment.getPatient().getPatientId());
-            ps.setInt(3, appointment.getDentist().getDentistId());
-            ps.setInt(4, appointment.getTreatmentType().getTreatmentTypeId());
-            ps.setDate(5, Date.valueOf(appointment.getAppointmentDate()));
-            ps.setTime(6, Time.valueOf(appointment.getAppointmentTime()));
-            ps.setString(7, appointment.getStatus());
-            ps.executeUpdate();
+        try (Connection conn = DBConnectionManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false); // start a transaction - explained below
+            try {
+                // Step A: insert with a temporary placeholder number (the column
+                // is NOT NULL + UNIQUE, so we can't insert an empty value here)
+                String placeholder = "PENDING-" + System.nanoTime();
+                try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                    ps.setString(1, placeholder);
+                    ps.setInt(2, appointment.getPatient().getPatientId());
+                    ps.setInt(3, appointment.getDentist().getDentistId());
+                    ps.setInt(4, appointment.getTreatmentType().getTreatmentTypeId());
+                    ps.setDate(5, Date.valueOf(appointment.getAppointmentDate()));
+                    ps.setTime(6, Time.valueOf(appointment.getAppointmentTime()));
+                    ps.setString(7, appointment.getStatus());
+                    ps.executeUpdate();
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    appointment.setAppointmentId(keys.getInt(1));
+                    try (ResultSet keys = ps.getGeneratedKeys()) {
+                        if (keys.next()) {
+                            appointment.setAppointmentId(keys.getInt(1));
+                        }
+                    }
                 }
+
+                // Step B: now that we know the generated ID, build the real
+                // number and update the row to use it instead of the placeholder
+                String realNumber = String.format("APT-%06d", appointment.getAppointmentId());
+                try (PreparedStatement ps2 = conn.prepareStatement(
+                        "UPDATE appointment SET appointment_number = ? WHERE appointment_id = ?")) {
+                    ps2.setString(1, realNumber);
+                    ps2.setInt(2, appointment.getAppointmentId());
+                    ps2.executeUpdate();
+                }
+                appointment.setAppointmentNumber(realNumber);
+
+                conn.commit(); // both steps succeeded - make them permanent together
+            } catch (SQLException e) {
+                conn.rollback(); // something failed - undo Step A too, don't leave a half-finished row
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
         }
         return appointment;
