@@ -1,23 +1,27 @@
 package dentalclinic.dao.impl;
 
 import dentalclinic.dao.AppointmentDAO;
-import dentalclinic.model.Appointment;
+import dentalclinic.model.*;
 import dentalclinic.util.DBConnectionManager;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * DAO PATTERN (implementation half) for Appointment persistence.
- *
- * TODO (student): this skeleton intentionally leaves the row -> object
- * mapping simplified (patient/dentist/treatmentType are not fully
- * hydrated here). Extend with JOINs against patient/dentist/treatment_type
- * tables, or compose calls to the other DAOs, once those are wired up.
- */
 public class AppointmentDAOImpl implements AppointmentDAO {
+
+    private static final String SELECT_BASE =
+            "SELECT a.appointment_id, a.appointment_number, a.appointment_date, a.appointment_time, a.status, " +
+                    "       p.patient_id, p.name AS patient_name, p.address AS patient_address, p.contact_number AS patient_contact, " +
+                    "       d.dentist_id, d.name AS dentist_name, d.specialization, " +
+                    "       t.treatment_type_id, t.name AS treatment_name, t.base_fee " +
+                    "FROM appointment a " +
+                    "JOIN patient p ON a.patient_id = p.patient_id " +
+                    "JOIN dentist d ON a.dentist_id = d.dentist_id " +
+                    "JOIN treatment_type t ON a.treatment_type_id = t.treatment_type_id ";
 
     @Override
     public Appointment save(Appointment appointment) throws SQLException {
@@ -47,14 +51,66 @@ public class AppointmentDAOImpl implements AppointmentDAO {
 
     @Override
     public Optional<Appointment> findByAppointmentNumber(String appointmentNumber) throws SQLException {
-        // TODO (student): implement with a JOIN across patient/dentist/
-        // treatment_type and map the full Appointment graph.
-        throw new UnsupportedOperationException("Implement lookup by appointment_number");
+        String sql = SELECT_BASE + "WHERE a.appointment_number = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, appointmentNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRowToAppointment(rs));
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public List<Appointment> findAll() throws SQLException {
-        // TODO (student): implement listing for reports/admin views.
-        return new ArrayList<>();
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = SELECT_BASE + "ORDER BY a.appointment_date, a.appointment_time";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                appointments.add(mapRowToAppointment(rs));
+            }
+        }
+        return appointments;
+    }
+
+    private Appointment mapRowToAppointment(ResultSet rs) throws SQLException {
+        Patient patient = new Patient(
+                rs.getInt("patient_id"),
+                rs.getString("patient_name"),
+                rs.getString("patient_address"),
+                rs.getString("patient_contact")
+        );
+
+        Dentist dentist = new Dentist(
+                rs.getInt("dentist_id"),
+                rs.getString("dentist_name"),
+                rs.getString("specialization")
+        );
+
+        TreatmentType treatmentType = new TreatmentType(
+                rs.getInt("treatment_type_id"),
+                rs.getString("treatment_name"),
+                rs.getBigDecimal("base_fee")
+        );
+
+        Appointment appointment = new Appointment(
+                rs.getString("appointment_number"),
+                patient,
+                dentist,
+                treatmentType,
+                rs.getDate("appointment_date").toLocalDate(),
+                rs.getTime("appointment_time").toLocalTime(),
+                rs.getString("status")
+        );
+        appointment.setAppointmentId(rs.getInt("appointment_id"));
+
+        return appointment;
     }
 }
