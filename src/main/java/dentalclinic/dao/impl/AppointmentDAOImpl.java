@@ -88,6 +88,23 @@ public class AppointmentDAOImpl implements AppointmentDAO {
     }
 
     @Override
+    public List<Appointment> findByDate(LocalDate date) throws SQLException {
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = SELECT_BASE + "WHERE a.appointment_date = ? ORDER BY a.appointment_time";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(date));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    appointments.add(mapRowToAppointment(rs));
+                }
+            }
+        }
+        return appointments;
+    }
+
+    @Override
     public List<Appointment> findAll() throws SQLException {
         List<Appointment> appointments = new ArrayList<>();
         String sql = SELECT_BASE + "ORDER BY a.appointment_date, a.appointment_time";
