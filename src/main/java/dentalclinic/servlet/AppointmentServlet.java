@@ -18,7 +18,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @WebServlet("/appointments/*")
 public class AppointmentServlet extends HttpServlet {
@@ -34,10 +36,51 @@ public class AppointmentServlet extends HttpServlet {
 
         if (pathInfo == null || pathInfo.equals("/") || pathInfo.equals("/new")) {
             request.getRequestDispatcher("/WEB-INF/views/new-appointment.jsp").forward(request, response);
+
+        } else if (pathInfo.equals("/search")) {
+            handleSearch(request, response);
+
         } else if (pathInfo.equals("/list")) {
-            response.getWriter().println("TODO: appointment list view not yet implemented");
+            handleList(request, response);
+
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    private void handleSearch(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String appointmentNumber = request.getParameter("appointmentNumber");
+
+        if (appointmentNumber == null || appointmentNumber.isBlank()) {
+            request.getRequestDispatcher("/WEB-INF/views/appointment-search.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            Optional<Appointment> found = appointmentDAO.findByAppointmentNumber(appointmentNumber.trim());
+            if (found.isPresent()) {
+                request.setAttribute("appointment", found.get());
+                request.getRequestDispatcher("/WEB-INF/views/appointment-details.jsp").forward(request, response);
+            } else {
+                request.setAttribute("errorMessage", "No appointment found with number " + appointmentNumber);
+                request.getRequestDispatcher("/WEB-INF/views/appointment-search.jsp").forward(request, response);
+            }
+        } catch (SQLException e) {
+            request.setAttribute("errorMessage", "A system error occurred.");
+            request.getRequestDispatcher("/WEB-INF/views/appointment-search.jsp").forward(request, response);
+        }
+    }
+
+    private void handleList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            List<Appointment> appointments = appointmentDAO.findAll();
+            request.setAttribute("appointments", appointments);
+            request.getRequestDispatcher("/WEB-INF/views/appointment-list.jsp").forward(request, response);
+        } catch (SQLException e) {
+            response.getWriter().println("Error loading appointments: " + e.getMessage());
         }
     }
 
@@ -60,21 +103,11 @@ public class AppointmentServlet extends HttpServlet {
 
         Map<String, String> fieldErrors = new HashMap<>();
 
-        if (ValidationUtil.isBlank(patientName)) {
-            fieldErrors.put("patientName", "Patient name is required.");
-        }
-        if (ValidationUtil.isBlank(address)) {
-            fieldErrors.put("address", "Address is required.");
-        }
-        if (!ValidationUtil.isValidContactNumber(contactNumber)) {
-            fieldErrors.put("contactNumber", "Enter a valid 10-digit number starting with 0 (e.g. 0771234567).");
-        }
-        if (ValidationUtil.isBlank(dentistIdRaw)) {
-            fieldErrors.put("dentistId", "Please select a dentist.");
-        }
-        if (ValidationUtil.isBlank(treatmentTypeIdRaw)) {
-            fieldErrors.put("treatmentTypeId", "Please select a treatment type.");
-        }
+        if (ValidationUtil.isBlank(patientName)) fieldErrors.put("patientName", "Patient name is required.");
+        if (ValidationUtil.isBlank(address)) fieldErrors.put("address", "Address is required.");
+        if (!ValidationUtil.isValidContactNumber(contactNumber)) fieldErrors.put("contactNumber", "Enter a valid 10-digit number starting with 0 (e.g. 0771234567).");
+        if (ValidationUtil.isBlank(dentistIdRaw)) fieldErrors.put("dentistId", "Please select a dentist.");
+        if (ValidationUtil.isBlank(treatmentTypeIdRaw)) fieldErrors.put("treatmentTypeId", "Please select a treatment type.");
 
         LocalDate appointmentDate = null;
         try {
