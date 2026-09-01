@@ -55,26 +55,7 @@ public class AppointmentApiServlet extends HttpServlet {
             }
 
             Appointment a = maybeAppointment.get();
-            String json = "{"
-                    + "\"appointmentNumber\":" + jsonString(a.getAppointmentNumber()) + ","
-                    + "\"status\":" + jsonString(a.getStatus()) + ","
-                    + "\"appointmentDate\":" + jsonString(a.getAppointmentDate().toString()) + ","
-                    + "\"appointmentTime\":" + jsonString(a.getAppointmentTime().toString()) + ","
-                    + "\"patient\":{"
-                    +     "\"name\":" + jsonString(a.getPatient().getName()) + ","
-                    +     "\"contactNumber\":" + jsonString(a.getPatient().getContactNumber())
-                    + "},"
-                    + "\"dentist\":{"
-                    +     "\"name\":" + jsonString(a.getDentist().getName()) + ","
-                    +     "\"specialization\":" + jsonString(a.getDentist().getSpecialization())
-                    + "},"
-                    + "\"treatmentType\":{"
-                    +     "\"name\":" + jsonString(a.getTreatmentType().getName()) + ","
-                    +     "\"baseFee\":" + a.getTreatmentType().getBaseFee()
-                    + "}"
-                    + "}";
-
-            response.getWriter().write(json);
+            response.getWriter().write(AppointmentJsonMapper.toJson(a));
 
         } catch (SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
