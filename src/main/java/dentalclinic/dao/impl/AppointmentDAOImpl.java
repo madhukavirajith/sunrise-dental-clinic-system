@@ -6,7 +6,6 @@ import dentalclinic.util.DBConnectionManager;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +14,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
 
     private static final String SELECT_BASE =
             "SELECT a.appointment_id, a.appointment_number, a.appointment_date, a.appointment_time, a.status, " +
-                    "       p.patient_id, p.name AS patient_name, p.address AS patient_address, p.contact_number AS patient_contact, " +
+                    "       p.patient_id, p.name AS patient_name, p.address AS patient_address, p.contact_number AS patient_contact, p.email AS patient_email, " +
                     "       d.dentist_id, d.name AS dentist_name, d.specialization, " +
                     "       t.treatment_type_id, t.name AS treatment_name, t.base_fee " +
                     "FROM appointment a " +
@@ -30,9 +29,8 @@ public class AppointmentDAOImpl implements AppointmentDAO {
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnectionManager.getInstance().getConnection()) {
-            conn.setAutoCommit(false); // start a transaction - explained below
+            conn.setAutoCommit(false);
             try {
-
                 String placeholder = "P" + (System.nanoTime() % 10_000_000_000L);
                 try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, placeholder);
@@ -88,6 +86,21 @@ public class AppointmentDAOImpl implements AppointmentDAO {
     }
 
     @Override
+    public List<Appointment> findAll() throws SQLException {
+        List<Appointment> appointments = new ArrayList<>();
+        String sql = SELECT_BASE + "ORDER BY a.appointment_date, a.appointment_time";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                appointments.add(mapRowToAppointment(rs));
+            }
+        }
+        return appointments;
+    }
+
+    @Override
     public List<Appointment> findByDate(LocalDate date) throws SQLException {
         List<Appointment> appointments = new ArrayList<>();
         String sql = SELECT_BASE + "WHERE a.appointment_date = ? ORDER BY a.appointment_time";
@@ -104,27 +117,19 @@ public class AppointmentDAOImpl implements AppointmentDAO {
         return appointments;
     }
 
-    @Override
-    public List<Appointment> findAll() throws SQLException {
-        List<Appointment> appointments = new ArrayList<>();
-        String sql = SELECT_BASE + "ORDER BY a.appointment_date, a.appointment_time";
-        try (Connection conn = DBConnectionManager.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                appointments.add(mapRowToAppointment(rs));
-            }
-        }
-        return appointments;
-    }
-
+    /**
+     * Shared row-mapping logic used by findByAppointmentNumber, findAll,
+     * and findByDate. FIXED: now reads patient_email (previously missing
+     * from SELECT_BASE, which silently produced a Patient with email
+     * always null even when a real email was stored in the database).
+     */
     private Appointment mapRowToAppointment(ResultSet rs) throws SQLException {
         Patient patient = new Patient(
                 rs.getInt("patient_id"),
                 rs.getString("patient_name"),
                 rs.getString("patient_address"),
-                rs.getString("patient_contact")
+                rs.getString("patient_contact"),
+                rs.getString("patient_email")
         );
 
         Dentist dentist = new Dentist(
