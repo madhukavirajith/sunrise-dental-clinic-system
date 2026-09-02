@@ -13,7 +13,7 @@
     <% } %>
     <form action="${pageContext.request.contextPath}/appointments/search" method="get">
         <label for="appointmentNumber">Appointment Number</label>
-        <input type="text" id="appointmentNumber" name="appointmentNumber" placeholder="APT-000001">
+        <input type="text" id="appointmentNumber" name="appointmentNumber" placeholder="APT-000001" value="${lastSearchedAppointment}">
         <button type="submit">Search</button>
     </form>
     <p><a href="${pageContext.request.contextPath}/appointments/list">View all appointments</a></p>

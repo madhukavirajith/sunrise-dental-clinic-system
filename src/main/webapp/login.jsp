@@ -12,6 +12,9 @@
     <% if (request.getAttribute("errorMessage") != null) { %>
         <p class="error"><%= request.getAttribute("errorMessage") %></p>
     <% } %>
+    <% if ("true".equals(request.getParameter("sessionExpired"))) { %>
+        <p class="error">Please log in to continue. Your session may have expired.</p>
+    <% } %>
 
     <form action="${pageContext.request.contextPath}/login" method="post">
         <label for="username">Username</label>
