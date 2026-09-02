@@ -14,6 +14,26 @@
 </head>
 <body>
     <h1>All Appointments</h1>
+    <%
+        Object previousLoginTime = session.getAttribute("previousLoginTime");
+    %>
+    <% if (previousLoginTime != null) { %>
+        <p>Welcome back! Your last login was: <%= previousLoginTime %></p>
+        <% session.removeAttribute("previousLoginTime"); %>
+    <% } %>
+
+    <%
+        java.util.LinkedList<String> recentlyViewed =
+                (java.util.LinkedList<String>) session.getAttribute("recentlyViewedAppointments");
+    %>
+    <% if (recentlyViewed != null && !recentlyViewed.isEmpty()) { %>
+    <div class="recently-viewed">
+        <strong>Recently Viewed:</strong>
+        <% for (String num : recentlyViewed) { %>
+            <a href="${pageContext.request.contextPath}/appointments/search?appointmentNumber=<%= num %>"><%= num %></a>
+        <% } %>
+    </div>
+    <% } %>
     <p>
         <a href="${pageContext.request.contextPath}/appointments/new">Register New Appointment</a> |
         <a href="${pageContext.request.contextPath}/appointments/search">Search Appointment</a> |

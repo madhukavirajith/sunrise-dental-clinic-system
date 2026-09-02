@@ -5,12 +5,15 @@ import dentalclinic.dao.PatientDAO;
 import dentalclinic.dao.impl.AppointmentDAOImpl;
 import dentalclinic.dao.impl.PatientDAOImpl;
 import dentalclinic.model.*;
+import dentalclinic.util.CookieUtil;
 import dentalclinic.util.ValidationUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,15 +21,29 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Presentation layer - handles "Register New Appointment",
+ * "Display Appointment Details" (search by appointment number), and the
+ * appointments listing. Also demonstrates session and cookie usage:
+ * - Session: a rolling list of the 5 most recently viewed appointments,
+ *   useful only for the current working session.
+ * - Cookie: remembers the last searched appointment number across
+ *   visits (7-day expiry), pre-filling the search field next time.
+ */
 @WebServlet("/appointments/*")
 public class AppointmentServlet extends HttpServlet {
 
     private final PatientDAO patientDAO = new PatientDAOImpl();
     private final AppointmentDAO appointmentDAO = new AppointmentDAOImpl();
+
+    private static final String RECENTLY_VIEWED_SESSION_KEY = "recentlyViewedAppointments";
+    private static final int MAX_RECENTLY_VIEWED = 5;
+    private static final String LAST_SEARCH_COOKIE_NAME = "lastSearchedAppointment";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -54,13 +71,27 @@ public class AppointmentServlet extends HttpServlet {
         String appointmentNumber = request.getParameter("appointmentNumber");
 
         if (appointmentNumber == null || appointmentNumber.isBlank()) {
+            // First visit to the search page (no search submitted yet) -
+            // pre-fill from a cookie if this browser has searched before,
+            // even in a previous session/day.
+            CookieUtil.readCookie(request, LAST_SEARCH_COOKIE_NAME)
+                    .ifPresent(value -> request.setAttribute("lastSearchedAppointment", value));
             request.getRequestDispatcher("/WEB-INF/views/appointment-search.jsp").forward(request, response);
             return;
         }
 
+        // Remember this search for next time, regardless of the outcome -
+        // 7-day expiry, since a search habit is short-lived compared to
+        // the 90-day login cookie in LoginServlet.
+        Cookie searchCookie = CookieUtil.createCookie(
+                LAST_SEARCH_COOKIE_NAME, appointmentNumber.trim(), 7 * 24 * 60 * 60, request.getContextPath() + "/"
+        );
+        response.addCookie(searchCookie);
+
         try {
             Optional<Appointment> found = appointmentDAO.findByAppointmentNumber(appointmentNumber.trim());
             if (found.isPresent()) {
+                addToRecentlyViewed(request, appointmentNumber.trim());
                 request.setAttribute("appointment", found.get());
                 request.getRequestDispatcher("/WEB-INF/views/appointment-details.jsp").forward(request, response);
             } else {
@@ -82,6 +113,26 @@ public class AppointmentServlet extends HttpServlet {
         } catch (SQLException e) {
             response.getWriter().println("Error loading appointments: " + e.getMessage());
         }
+    }
+
+    /**
+     * Adds an appointment number to the front of the session's
+     * "recently viewed" list, removing any earlier duplicate and
+     * trimming the list to MAX_RECENTLY_VIEWED entries.
+     */
+    private void addToRecentlyViewed(HttpServletRequest request, String appointmentNumber) {
+        HttpSession session = request.getSession();
+        @SuppressWarnings("unchecked")
+        LinkedList<String> recentlyViewed = (LinkedList<String>) session.getAttribute(RECENTLY_VIEWED_SESSION_KEY);
+        if (recentlyViewed == null) {
+            recentlyViewed = new LinkedList<>();
+        }
+        recentlyViewed.remove(appointmentNumber); // avoid showing the same number twice
+        recentlyViewed.addFirst(appointmentNumber);
+        while (recentlyViewed.size() > MAX_RECENTLY_VIEWED) {
+            recentlyViewed.removeLast();
+        }
+        session.setAttribute(RECENTLY_VIEWED_SESSION_KEY, recentlyViewed);
     }
 
     @Override
