@@ -7,17 +7,22 @@ import dentalclinic.util.DBConnectionManager;
 import java.sql.*;
 import java.util.Optional;
 
+/**
+ * DAO PATTERN (implementation half). Talks to MySQL via plain JDBC only -
+ * no ORM framework.
+ */
 public class PatientDAOImpl implements PatientDAO {
 
     @Override
     public Patient save(Patient patient) throws SQLException {
-        String sql = "INSERT INTO patient (name, address, contact_number) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO patient (name, address, contact_number, email) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, patient.getName());
             ps.setString(2, patient.getAddress());
             ps.setString(3, patient.getContactNumber());
+            ps.setString(4, patient.getEmail());
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -31,7 +36,7 @@ public class PatientDAOImpl implements PatientDAO {
 
     @Override
     public Optional<Patient> findById(int patientId) throws SQLException {
-        String sql = "SELECT patient_id, name, address, contact_number FROM patient WHERE patient_id = ?";
+        String sql = "SELECT patient_id, name, address, contact_number, email FROM patient WHERE patient_id = ?";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -42,7 +47,8 @@ public class PatientDAOImpl implements PatientDAO {
                             rs.getInt("patient_id"),
                             rs.getString("name"),
                             rs.getString("address"),
-                            rs.getString("contact_number")
+                            rs.getString("contact_number"),
+                            rs.getString("email")
                     );
                     return Optional.of(patient);
                 }
@@ -50,16 +56,18 @@ public class PatientDAOImpl implements PatientDAO {
         }
         return Optional.empty();
     }
+
     @Override
     public void update(Patient patient) throws SQLException {
-        String sql = "UPDATE patient SET name = ?, address = ?, contact_number = ? WHERE patient_id = ?";
+        String sql = "UPDATE patient SET name = ?, address = ?, contact_number = ?, email = ? WHERE patient_id = ?";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, patient.getName());
             ps.setString(2, patient.getAddress());
             ps.setString(3, patient.getContactNumber());
-            ps.setInt(4, patient.getPatientId());
+            ps.setString(4, patient.getEmail());
+            ps.setInt(5, patient.getPatientId());
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 0) {

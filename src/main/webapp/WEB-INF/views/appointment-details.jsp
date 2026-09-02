@@ -21,6 +21,7 @@
 
     <p>
         <a href="${pageContext.request.contextPath}/billing?appointmentNumber=<%= a.getAppointmentNumber() %>">Generate Bill</a>
+        | <a href="${pageContext.request.contextPath}/notifications?appointmentId=<%= a.getAppointmentId() %>">View Notification History</a>
         | <a href="${pageContext.request.contextPath}/appointments/list">Back to list</a>
     </p>
 </body>

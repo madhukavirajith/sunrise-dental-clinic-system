@@ -27,9 +27,10 @@
         <input type="text" id="contactNumber" name="contactNumber" value="${contactNumber}" placeholder="0771234567">
         <span class="error">${fieldErrors.contactNumber}</span>
 
-        <!-- TODO (student): these two dropdowns are hardcoded to match the
-             seed data in schema.sql for now. A future improvement would be
-             to load them dynamically via DentistDAO/TreatmentTypeDAO. -->
+        <label for="email">Email (optional - for appointment confirmation)</label>
+        <input type="email" id="email" name="email" value="${email}" placeholder="patient@example.com">
+        <span class="error">${fieldErrors.email}</span>
+
         <label for="dentistId">Dentist</label>
         <select id="dentistId" name="dentistId">
             <option value="">-- Select a dentist --</option>

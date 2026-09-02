@@ -27,6 +27,7 @@
         <url-pattern>/appointments/*</url-pattern>
         <url-pattern>/billing/*</url-pattern>
         <url-pattern>/reports/*</url-pattern>
+        <url-pattern>/notifications</url-pattern>
     </filter-mapping>
 
     <!-- Custom error pages -->
