@@ -1,50 +1,44 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("pageTitle", "Notification Center"); request.setAttribute("activeNav", "notifications"); %>
+<%@ include file="/WEB-INF/views/partials/app-header.jsp" %>
 <%@ page import="java.util.List" %>
 <%@ page import="dentalclinic.model.Notification" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Notification Center - Sunrise Dental Clinic</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        td, th { border: 1px solid #ccc; padding: 6px; text-align: left; }
-        .status-SIMULATED { color: #b8860b; }
-        .status-SENT { color: #1b6f6f; font-weight: bold; }
-        .status-FAILED { color: #b00020; }
-    </style>
-</head>
-<body>
+
+<div class="page-header">
     <h1>Notification Center</h1>
     <p>
-        <% if ((Boolean) request.getAttribute("filtered")) { %>
-            Showing notifications for one appointment.
-            <a href="${pageContext.request.contextPath}/notifications">View all notifications</a>
+        <% if (Boolean.TRUE.equals(request.getAttribute("filtered"))) { %>
+            Showing notifications for one appointment. <a href="${pageContext.request.contextPath}/notifications">View all</a>
         <% } else { %>
             Showing all notification history across the system.
         <% } %>
     </p>
+</div>
 
 <%
     List<Notification> notifications = (List<Notification>) request.getAttribute("notifications");
 %>
-    <table>
-        <tr><th>Appointment</th><th>Channel</th><th>Recipient</th><th>Message</th><th>Status</th></tr>
-        <% for (Notification n : notifications) { %>
+<% if (notifications == null || notifications.isEmpty()) { %>
+    <div class="card empty-state">
+        <p>No notifications found.</p>
+    </div>
+<% } else { %>
+<table class="data-table">
+    <thead><tr><th>Appointment</th><th>Channel</th><th>Recipient</th><th>Message</th><th>Status</th></tr></thead>
+    <tbody>
+        <% for (Notification n : notifications) {
+            String badgeClass = "SENT".equals(n.getStatus()) ? "badge-sent"
+                    : "SIMULATED".equals(n.getStatus()) ? "badge-simulated" : "badge-failed";
+        %>
         <tr>
             <td><%= n.getAppointment().getAppointmentNumber() %></td>
             <td><%= n.getChannel() %></td>
             <td><%= n.getRecipient() %></td>
             <td><%= n.getMessage() %></td>
-            <td class="status-<%= n.getStatus() %>"><%= n.getStatus() %></td>
+            <td><span class="badge <%= badgeClass %>"><%= n.getStatus() %></span></td>
         </tr>
         <% } %>
-        <% if (notifications.isEmpty()) { %>
-        <tr><td colspan="5">No notifications found.</td></tr>
-        <% } %>
-    </table>
+    </tbody>
+</table>
+<% } %>
 
-    <p><a href="${pageContext.request.contextPath}/appointments/list">Back to appointments</a></p>
-</body>
-</html>
+<%@ include file="/WEB-INF/views/partials/app-footer.jsp" %>

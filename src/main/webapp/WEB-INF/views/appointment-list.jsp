@@ -1,29 +1,19 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("pageTitle", "Appointments"); request.setAttribute("activeNav", "dashboard"); %>
+<%@ include file="/WEB-INF/views/partials/app-header.jsp" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.LinkedList" %>
 <%@ page import="dentalclinic.model.Appointment" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>All Appointments - Sunrise Dental Clinic</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        td, th { border: 1px solid #ccc; padding: 6px; text-align: left; }
-        .welcome-back { color: #1b6f6f; font-weight: bold; }
-        .recently-viewed { margin: 10px 0; padding: 8px; background: #f4f4f4; }
-        .recently-viewed a { margin-right: 10px; }
-    </style>
-</head>
-<body>
-    <h1>All Appointments</h1>
+
+<div class="page-header">
+    <h1>Appointments</h1>
+    <p>Today's schedule and recent activity.</p>
+</div>
 
 <%
     Object previousLoginTime = session.getAttribute("previousLoginTime");
 %>
 <% if (previousLoginTime != null) { %>
-    <p class="welcome-back">Welcome back! Your last login was: <%= previousLoginTime %></p>
+    <div class="welcome-banner">Welcome back! Your last login was <%= previousLoginTime %>.</div>
     <% session.removeAttribute("previousLoginTime"); %>
 <% } %>
 
@@ -33,38 +23,43 @@
             (LinkedList<String>) session.getAttribute("recentlyViewedAppointments");
 %>
 <% if (recentlyViewed != null && !recentlyViewed.isEmpty()) { %>
-<div class="recently-viewed">
-    <strong>Recently Viewed:</strong>
+<div class="chip-row">
     <% for (String num : recentlyViewed) { %>
-        <a href="${pageContext.request.contextPath}/appointments/search?appointmentNumber=<%= num %>"><%= num %></a>
+        <a class="chip" href="${pageContext.request.contextPath}/appointments/search?appointmentNumber=<%= num %>"><%= num %></a>
     <% } %>
 </div>
 <% } %>
 
-    <p>
-        <a href="${pageContext.request.contextPath}/appointments/new">Register New Appointment</a> |
-        <a href="${pageContext.request.contextPath}/appointments/search">Search Appointment</a> |
-        <a href="${pageContext.request.contextPath}/reports/daily">Daily Report</a> |
-        <a href="${pageContext.request.contextPath}/notifications">Notification Center</a> |
-        <a href="${pageContext.request.contextPath}/help.jsp">Help</a> |
-        <a href="${pageContext.request.contextPath}/logout">Logout</a>
-    </p>
 <%
     List<Appointment> appointments = (List<Appointment>) request.getAttribute("appointments");
 %>
-    <table>
+<% if (appointments == null || appointments.isEmpty()) { %>
+    <div class="card empty-state">
+        <p>No appointments have been registered yet.</p>
+        <a href="${pageContext.request.contextPath}/appointments/new" class="btn btn-primary">Register the first appointment</a>
+    </div>
+<% } else { %>
+<table class="data-table">
+    <thead>
         <tr><th>Number</th><th>Patient</th><th>Dentist</th><th>Treatment</th><th>Date</th><th>Time</th><th>Status</th></tr>
-        <% for (Appointment a : appointments) { %>
+    </thead>
+    <tbody>
+        <% for (Appointment a : appointments) {
+            String badgeClass = "SCHEDULED".equals(a.getStatus()) ? "badge-scheduled"
+                    : "COMPLETED".equals(a.getStatus()) ? "badge-completed" : "badge-cancelled";
+        %>
         <tr>
             <td><a href="${pageContext.request.contextPath}/appointments/search?appointmentNumber=<%= a.getAppointmentNumber() %>"><%= a.getAppointmentNumber() %></a></td>
             <td><%= a.getPatient().getName() %></td>
             <td><%= a.getDentist().getName() %></td>
             <td><%= a.getTreatmentType().getName() %></td>
-            <td><%= a.getAppointmentDate() %></td>
-            <td><%= a.getAppointmentTime() %></td>
-            <td><%= a.getStatus() %></td>
+            <td class="num"><%= a.getAppointmentDate() %></td>
+            <td class="num"><%= a.getAppointmentTime() %></td>
+            <td><span class="badge <%= badgeClass %>"><%= a.getStatus() %></span></td>
         </tr>
         <% } %>
-    </table>
-</body>
-</html>
+    </tbody>
+</table>
+<% } %>
+
+<%@ include file="/WEB-INF/views/partials/app-footer.jsp" %>

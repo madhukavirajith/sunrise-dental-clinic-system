@@ -1,20 +1,23 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Billing - Sunrise Dental Clinic</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-</head>
-<body>
+<% request.setAttribute("pageTitle", "Billing"); request.setAttribute("activeNav", "billing"); %>
+<%@ include file="/WEB-INF/views/partials/app-header.jsp" %>
+
+<div class="page-header">
     <h1>Calculate Bill</h1>
-    <% if (request.getAttribute("errorMessage") != null) { %>
-        <p class="error"><%= request.getAttribute("errorMessage") %></p>
-    <% } %>
-    <form action="${pageContext.request.contextPath}/billing" method="get">
-        <label for="appointmentNumber">Appointment Number</label>
-        <input type="text" id="appointmentNumber" name="appointmentNumber" placeholder="APT-000001">
-        <button type="submit">Get Bill</button>
+    <p>Enter an appointment number to view or generate its bill.</p>
+</div>
+
+<% if (request.getAttribute("errorMessage") != null) { %>
+    <p class="alert alert-error"><%= request.getAttribute("errorMessage") %></p>
+<% } %>
+
+<div class="card">
+    <form action="${pageContext.request.contextPath}/billing" method="get" class="form-grid" style="max-width:360px;">
+        <div>
+            <label for="appointmentNumber">Appointment Number</label>
+            <input type="text" id="appointmentNumber" name="appointmentNumber" placeholder="APT-000001">
+        </div>
+        <button type="submit" class="btn btn-primary">Get Bill</button>
     </form>
-</body>
-</html>
+</div>
+
+<%@ include file="/WEB-INF/views/partials/app-footer.jsp" %>

@@ -1,28 +1,32 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("pageTitle", "Appointment Details"); request.setAttribute("activeNav", "search"); %>
+<%@ include file="/WEB-INF/views/partials/app-header.jsp" %>
 <%@ page import="dentalclinic.model.Appointment" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Appointment Details - Sunrise Dental Clinic</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-</head>
-<body>
+
 <%
     Appointment a = (Appointment) request.getAttribute("appointment");
+    String badgeClass = "SCHEDULED".equals(a.getStatus()) ? "badge-scheduled"
+            : "COMPLETED".equals(a.getStatus()) ? "badge-completed" : "badge-cancelled";
 %>
-    <h1>Appointment Details</h1>
-    <p><strong>Number:</strong> <%= a.getAppointmentNumber() %></p>
-    <p><strong>Patient:</strong> <%= a.getPatient().getName() %> (<%= a.getPatient().getContactNumber() %>)</p>
-    <p><strong>Dentist:</strong> <%= a.getDentist().getName() %></p>
-    <p><strong>Treatment:</strong> <%= a.getTreatmentType().getName() %></p>
-    <p><strong>Date/Time:</strong> <%= a.getAppointmentDate() %> at <%= a.getAppointmentTime() %></p>
-    <p><strong>Status:</strong> <%= a.getStatus() %></p>
 
-    <p>
-        <a href="${pageContext.request.contextPath}/billing?appointmentNumber=<%= a.getAppointmentNumber() %>">Generate Bill</a>
-        | <a href="${pageContext.request.contextPath}/notifications?appointmentId=<%= a.getAppointmentId() %>">View Notification History</a>
-        | <a href="${pageContext.request.contextPath}/appointments/list">Back to list</a>
-    </p>
-</body>
-</html>
+<div class="page-header">
+    <h1><%= a.getAppointmentNumber() %></h1>
+    <p><span class="badge <%= badgeClass %>"><%= a.getStatus() %></span></p>
+</div>
+
+<div class="card">
+    <dl class="bill-meta">
+        <dt>Patient</dt><dd><%= a.getPatient().getName() %> (<%= a.getPatient().getContactNumber() %>)</dd>
+        <dt>Dentist</dt><dd><%= a.getDentist().getName() %></dd>
+        <dt>Treatment</dt><dd><%= a.getTreatmentType().getName() %></dd>
+        <dt>Date</dt><dd class="num"><%= a.getAppointmentDate() %></dd>
+        <dt>Time</dt><dd class="num"><%= a.getAppointmentTime() %></dd>
+    </dl>
+
+    <div class="bill-actions">
+        <a href="${pageContext.request.contextPath}/billing?appointmentNumber=<%= a.getAppointmentNumber() %>" class="btn btn-primary">Generate Bill</a>
+        <a href="${pageContext.request.contextPath}/notifications?appointmentId=<%= a.getAppointmentId() %>" class="btn btn-secondary">Notification History</a>
+        <a href="${pageContext.request.contextPath}/appointments/list" class="btn btn-secondary">Back to list</a>
+    </div>
+</div>
+
+<%@ include file="/WEB-INF/views/partials/app-footer.jsp" %>

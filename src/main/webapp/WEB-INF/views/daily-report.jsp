@@ -1,45 +1,50 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("pageTitle", "Daily Report"); request.setAttribute("activeNav", "reports"); %>
+<%@ include file="/WEB-INF/views/partials/app-header.jsp" %>
 <%@ page import="java.util.List" %>
 <%@ page import="dentalclinic.model.Appointment" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Daily Report - Sunrise Dental Clinic</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        td, th { border: 1px solid #ccc; padding: 6px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>Daily Appointments Report</h1>
-    <form action="${pageContext.request.contextPath}/reports/daily" method="get">
-        <label for="date">Date</label>
-        <input type="date" id="date" name="date" value="${reportDate}">
-        <button type="submit">View Report</button>
-    </form>
 
-    <p><strong>Date:</strong> ${reportDate} &nbsp;
-       <strong>Total Appointments:</strong> ${appointmentCount} &nbsp;
-       <strong>Expected Revenue:</strong> LKR ${expectedRevenue}</p>
+<div class="page-header">
+    <h1>Daily Appointments Report</h1>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+    <form action="${pageContext.request.contextPath}/reports/daily" method="get" class="form-grid" style="max-width:320px;">
+        <div>
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" value="${reportDate}">
+        </div>
+        <button type="submit" class="btn btn-primary">View Report</button>
+    </form>
+</div>
+
+<div class="chip-row">
+    <span class="chip">Date: ${reportDate}</span>
+    <span class="chip">Appointments: ${appointmentCount}</span>
+    <span class="chip">Expected Revenue: LKR ${expectedRevenue}</span>
+</div>
 
 <%
     List<Appointment> appointments = (List<Appointment>) request.getAttribute("appointments");
 %>
-    <table>
-        <tr><th>Number</th><th>Time</th><th>Patient</th><th>Dentist</th><th>Treatment</th></tr>
+<% if (appointments == null || appointments.isEmpty()) { %>
+    <div class="card empty-state">
+        <p>No appointments are scheduled for this date.</p>
+    </div>
+<% } else { %>
+<table class="data-table">
+    <thead><tr><th>Number</th><th>Time</th><th>Patient</th><th>Dentist</th><th>Treatment</th></tr></thead>
+    <tbody>
         <% for (Appointment a : appointments) { %>
         <tr>
             <td><%= a.getAppointmentNumber() %></td>
-            <td><%= a.getAppointmentTime() %></td>
+            <td class="num"><%= a.getAppointmentTime() %></td>
             <td><%= a.getPatient().getName() %></td>
             <td><%= a.getDentist().getName() %></td>
             <td><%= a.getTreatmentType().getName() %></td>
         </tr>
         <% } %>
-    </table>
+    </tbody>
+</table>
+<% } %>
 
-    <p><a href="${pageContext.request.contextPath}/appointments/list">Back to appointments</a></p>
-</body>
-</html>
+<%@ include file="/WEB-INF/views/partials/app-footer.jsp" %>
