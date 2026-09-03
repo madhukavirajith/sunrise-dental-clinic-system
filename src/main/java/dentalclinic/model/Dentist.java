@@ -1,8 +1,5 @@
 package dentalclinic.model;
 
-/**
- * Domain model representing a dentist available at the clinic.
- */
 public class Dentist {
 
     private int dentistId;

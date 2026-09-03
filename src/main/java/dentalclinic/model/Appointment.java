@@ -3,11 +3,6 @@ package dentalclinic.model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/**
- * Domain model representing a single appointment.
- * appointmentNumber is the unique, human-searchable identifier referenced
- * throughout the assignment brief (used for "Display Appointment Details").
- */
 public class Appointment {
 
     private int appointmentId;

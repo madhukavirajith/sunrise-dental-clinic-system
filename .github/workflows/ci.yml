@@ -1,9 +1,5 @@
 name: CI
 
-# Runs on every push and pull request against main/develop.
-# This satisfies the "Workflow (CI/CD) demonstrated" criterion in the
-# Task D (Documentation/GitHub) marking rubric - screenshot the green
-# check runs from the Actions tab and include them in your report.
 on:
   push:
     branches: [ "main", "develop", "feature/**" ]

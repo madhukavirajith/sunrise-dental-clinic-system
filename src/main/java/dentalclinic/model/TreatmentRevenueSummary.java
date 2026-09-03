@@ -2,10 +2,6 @@ package dentalclinic.model;
 
 import java.math.BigDecimal;
 
-/**
- * Aggregate row for the "Revenue by Treatment Type" report - not a
- * persisted entity, just a data holder for a GROUP BY query result.
- */
 public class TreatmentRevenueSummary {
 
     private String treatmentName;

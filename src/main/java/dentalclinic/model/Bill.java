@@ -2,9 +2,6 @@ package dentalclinic.model;
 
 import java.math.BigDecimal;
 
-/**
- * Domain model representing a generated bill/receipt for an appointment.
- */
 public class Bill {
 
     private int billId;

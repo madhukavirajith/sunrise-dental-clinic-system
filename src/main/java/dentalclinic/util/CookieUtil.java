@@ -9,11 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 
-/**
- * Small shared helper for reading/writing cookies, used by LoginServlet
- * and AppointmentServlet. Centralising this avoids duplicating the same
- * lookup-by-name loop and URL encode/decode logic in multiple servlets.
- */
 public class CookieUtil {
 
     public static Optional<String> readCookie(HttpServletRequest request, String name) {
@@ -30,9 +25,6 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, urlEncode(value));
         cookie.setMaxAge(maxAgeSeconds);
         cookie.setPath(path);
-        // httpOnly means JavaScript on the page cannot read this cookie -
-        // a basic but genuine security measure against XSS-based cookie
-        // theft, worth mentioning under the brief's "Ethical" EDGE attribute.
         cookie.setHttpOnly(true);
         return cookie;
     }

@@ -1,11 +1,3 @@
--- Sunrise Dental Clinic - Appointment and Patient Management System
--- Run this against your local XAMPP/WAMPP MySQL instance:
---   mysql -u root -p < database/schema.sql
---
--- TODO (student): extend with indexes, constraints, and any stored
--- procedures/functions/triggers you choose to implement for the
--- "advanced database features" marks in Task B's top grade band.
-
 CREATE DATABASE IF NOT EXISTS sunrise_dental_clinic
     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -64,7 +56,6 @@ CREATE TABLE IF NOT EXISTS bill (
         FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id)
 );
 
--- Seed data for local development/testing only.
 INSERT INTO treatment_type (name, base_fee) VALUES
     ('Routine Check-up', 500.00),
     ('Teeth Cleaning', 1500.00),

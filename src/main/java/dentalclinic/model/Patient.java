@@ -1,10 +1,5 @@
 package dentalclinic.model;
 
-/**
- * Domain model representing a registered patient.
- * Plain data holder - persistence logic lives in PatientDAO, not here
- * (Single Responsibility Principle).
- */
 public class Patient {
 
     private int patientId;
@@ -16,11 +11,6 @@ public class Patient {
     public Patient() {
     }
 
-    /**
-     * Original 4-argument constructor kept as-is so every existing call
-     * site across the codebase keeps compiling unchanged. Use setEmail()
-     * afterward, or the 5-argument constructor below, to set an email.
-     */
     public Patient(int patientId, String name, String address, String contactNumber) {
         this.patientId = patientId;
         this.name = name;

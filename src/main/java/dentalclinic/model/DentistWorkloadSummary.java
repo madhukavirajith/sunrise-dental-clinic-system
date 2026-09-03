@@ -1,9 +1,5 @@
 package dentalclinic.model;
 
-/**
- * Aggregate row for the "Dentist Workload" report - not a persisted
- * entity, just a data holder for a GROUP BY query result.
- */
 public class DentistWorkloadSummary {
 
     private String dentistName;

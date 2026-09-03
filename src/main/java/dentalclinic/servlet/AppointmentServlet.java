@@ -27,13 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Presentation layer - handles "Register New Appointment",
- * "Display Appointment Details" (search by appointment number), and the
- * appointments listing. Also demonstrates session/cookie usage and
- * dispatches confirmation notifications (Observer pattern) after a
- * successful registration.
- */
 @WebServlet("/appointments/*")
 public class AppointmentServlet extends HttpServlet {
 
@@ -89,14 +82,11 @@ public class AppointmentServlet extends HttpServlet {
                 Appointment appointment = found.get();
                 request.setAttribute("appointment", appointment);
 
-                // Uses the GetPatientAppointmentCount MySQL FUNCTION via
-                // PatientDAO - non-critical, so a failure here doesn't
-                // block viewing the appointment itself.
                 try {
                     int count = patientDAO.countAppointments(appointment.getPatient().getPatientId());
                     request.setAttribute("patientAppointmentCount", count);
                 } catch (SQLException ignored) {
-                    // details page simply omits the count if this fails
+
                 }
 
                 request.getRequestDispatcher("/WEB-INF/views/appointment-details.jsp").forward(request, response);
@@ -187,12 +177,6 @@ public class AppointmentServlet extends HttpServlet {
         }
 
         try {
-            // Find-or-create: a returning patient (same contact number)
-            // reuses their existing record instead of a duplicate being
-            // created on every visit. This also makes
-            // GetPatientAppointmentCount() meaningful - without this,
-            // every patient row would only ever have exactly one
-            // appointment, since a new row was created every time.
             Patient patient;
             Optional<Patient> existingPatient = patientDAO.findByContactNumber(contactNumber.trim());
             if (existingPatient.isPresent()) {
@@ -225,10 +209,7 @@ public class AppointmentServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/appointment-confirmation.jsp").forward(request, response);
 
         } catch (SQLException e) {
-            // The prevent_double_booking trigger (see
-            // database/advanced_features_v2.sql) rejects the insert with
-            // a specific message via SIGNAL - detect it here and show
-            // the user something actionable instead of a generic error.
+
             String message = (e.getMessage() != null && e.getMessage().contains("already has an appointment"))
                     ? "This dentist already has an appointment at the selected date and time. Please choose a different time."
                     : "A system error occurred while saving. Please try again.";

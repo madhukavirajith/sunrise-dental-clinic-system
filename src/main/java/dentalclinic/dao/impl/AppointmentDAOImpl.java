@@ -117,12 +117,6 @@ public class AppointmentDAOImpl implements AppointmentDAO {
         return appointments;
     }
 
-    /**
-     * Shared row-mapping logic used by findByAppointmentNumber, findAll,
-     * and findByDate. FIXED: now reads patient_email (previously missing
-     * from SELECT_BASE, which silently produced a Patient with email
-     * always null even when a real email was stored in the database).
-     */
     private Appointment mapRowToAppointment(ResultSet rs) throws SQLException {
         Patient patient = new Patient(
                 rs.getInt("patient_id"),

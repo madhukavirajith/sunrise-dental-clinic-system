@@ -33,16 +33,13 @@ public class PasswordUtil {
         try {
             String[] parts = storedSaltAndHash.split(":");
             if (parts.length != 2) {
-                return false; // stored value isn't in the expected salt:hash format
+                return false;
             }
             byte[] salt = Base64.getDecoder().decode(parts[0]);
             byte[] expectedHash = Base64.getDecoder().decode(parts[1]);
 
             byte[] attemptHash = pbkdf2(plainTextPasswordAttempt.toCharArray(), salt);
 
-            // MessageDigest.isEqual is used instead of Arrays.equals or ==
-            // because it runs in constant time, avoiding a timing-attack
-            // side channel that could leak how many leading bytes matched.
             return MessageDigest.isEqual(expectedHash, attemptHash);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new IllegalStateException("Unable to verify password", e);

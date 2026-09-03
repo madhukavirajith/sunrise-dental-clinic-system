@@ -7,10 +7,6 @@ import dentalclinic.util.DBConnectionManager;
 import java.sql.*;
 import java.util.Optional;
 
-/**
- * DAO PATTERN (implementation half). Talks to MySQL via plain JDBC only -
- * no ORM framework.
- */
 public class PatientDAOImpl implements PatientDAO {
 
     @Override
@@ -102,10 +98,6 @@ public class PatientDAOImpl implements PatientDAO {
 
     @Override
     public int countAppointments(int patientId) throws SQLException {
-        // Calls the MySQL FUNCTION directly inline in a SELECT - this is
-        // the distinguishing trait of a function vs. a stored procedure:
-        // it can be used as an expression, not just called as a
-        // standalone statement.
         String sql = "SELECT GetPatientAppointmentCount(?) AS appointment_count";
         try (Connection conn = DBConnectionManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

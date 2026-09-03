@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 public class ValidationUtil {
 
-    // Assumes local Sri Lankan mobile format: 0 followed by 9 digits (10 total)
     private static final Pattern CONTACT_NUMBER_PATTERN = Pattern.compile("^0\\d{9}$");
 
     public static boolean isBlank(String value) {

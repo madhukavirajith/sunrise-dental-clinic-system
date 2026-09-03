@@ -1,11 +1,5 @@
 package dentalclinic.model;
 
-/**
- * Domain model representing one notification attempt (email or SMS)
- * associated with an appointment. Every attempt is recorded, regardless
- * of whether delivery was real, simulated, or failed - this history is
- * what powers the Notification Center feature.
- */
 public class Notification {
 
     private int notificationId;

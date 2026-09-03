@@ -1,8 +1,5 @@
 package dentalclinic.model;
 
-/**
- * Aggregate row for the "Appointment Status Breakdown" report.
- */
 public class StatusSummary {
 
     private String status;

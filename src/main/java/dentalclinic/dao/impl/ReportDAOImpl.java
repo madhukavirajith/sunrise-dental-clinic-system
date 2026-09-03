@@ -18,10 +18,6 @@ public class ReportDAOImpl implements ReportDAO {
     @Override
     public List<TreatmentRevenueSummary> findRevenueByTreatmentType() throws SQLException {
         List<TreatmentRevenueSummary> results = new ArrayList<>();
-        // Revenue is computed from the treatment's current base_fee, not
-        // from the bill table, so this report reflects ALL appointments
-        // booked (not only ones that have already been billed) - giving
-        // a forward-looking view of expected income by service.
         String sql = "SELECT t.name AS treatment_name, COUNT(*) AS appointment_count, " +
                 "SUM(t.base_fee) AS total_revenue " +
                 "FROM appointment a " +

@@ -3,11 +3,6 @@ package dentalclinic.dao.mapper;
 import dentalclinic.model.Appointment;
 import dentalclinic.util.JsonUtil;
 
-/**
- * Extracted from AppointmentApiServlet so the JSON-building logic can be
- * unit tested directly, without needing a running server or a mocking
- * library (Mockito is not on the assignment's allowed-dependency list).
- */
 public class AppointmentJsonMapper {
 
     public static String toJson(Appointment a) {

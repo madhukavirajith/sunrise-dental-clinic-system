@@ -23,12 +23,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-/**
- * Handles the Reports section: a landing page listing every available
- * report, plus each individual report. Routed as a single servlet with
- * path-based dispatch (like AppointmentServlet), since all reports share
- * the same authentication protection (/reports/* in web.xml).
- */
 @WebServlet("/reports/*")
 public class ReportServlet extends HttpServlet {
 

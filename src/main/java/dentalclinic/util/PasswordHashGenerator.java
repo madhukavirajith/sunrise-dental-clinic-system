@@ -3,7 +3,7 @@ package dentalclinic.util;
 public class PasswordHashGenerator {
 
     public static void main(String[] args) {
-        String plainTextPassword = "password123"; // change this if you like
+        String plainTextPassword = "password123";
 
         String hash = PasswordUtil.hashPassword(plainTextPassword);
 

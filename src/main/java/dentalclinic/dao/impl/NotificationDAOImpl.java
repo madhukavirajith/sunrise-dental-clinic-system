@@ -74,11 +74,6 @@ public class NotificationDAOImpl implements NotificationDAO {
         return notifications;
     }
 
-    /**
-     * Lightweight mapping: only appointmentNumber is populated on the
-     * nested Appointment (not the full patient/dentist/treatment graph),
-     * since that's all the Notification Center view needs to display.
-     */
     private Notification mapRow(ResultSet rs) throws SQLException {
         Notification notification = new Notification();
         notification.setNotificationId(rs.getInt("notification_id"));

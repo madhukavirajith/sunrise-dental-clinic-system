@@ -13,16 +13,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Notification Center - lists every notification attempt (email/SMS,
- * across all channels and outcomes) so staff can verify whether a
- * patient was actually notified about their appointment. This is the
- * "innovative feature" beyond the six core requirements: an audit trail
- * for the notification system, not just the notifications themselves.
- *
- * Optional ?appointmentId=N query param filters to just one
- * appointment's history (linked from appointment-details.jsp).
- */
 @WebServlet("/notifications")
 public class NotificationServlet extends HttpServlet {
 

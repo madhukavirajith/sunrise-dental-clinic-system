@@ -8,17 +8,6 @@ import dentalclinic.model.Notification;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * OBSERVER PATTERN (subject role).
- *
- * AppointmentServlet only ever calls notifyAppointmentRegistered() -
- * it has no knowledge of how many notification channels exist or what
- * they do. Adding a future channel (e.g. push notifications) means
- * adding one line to the "channels" list below; AppointmentServlet
- * never needs to change. This decoupling is the entire point of the
- * Observer pattern, and is what distinguishes it from simply calling
- * two methods directly from the servlet.
- */
 public class NotificationDispatcher {
 
     private final List<NotificationChannel> channels;
@@ -39,9 +28,6 @@ public class NotificationDispatcher {
             try {
                 notificationDAO.save(notification);
             } catch (SQLException e) {
-                // A persistence failure here should not break appointment
-                // registration itself, which has already succeeded by the
-                // time this runs - log and continue to the next channel.
                 System.err.println("Failed to save notification record: " + e.getMessage());
             }
         }

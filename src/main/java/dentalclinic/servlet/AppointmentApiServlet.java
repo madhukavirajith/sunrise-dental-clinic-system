@@ -14,27 +14,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Optional;
 
-/**
- * A JSON web service endpoint - satisfies the "developed as a web
- * service" requirement using plain Java EE Servlets. JSON is built via
- * AppointmentJsonMapper (no external library), since this project's
- * allowed dependencies don't include a JAX-RS runtime; the optional
- * "serialization dependency" allowance would justify adding a JSON
- * library if the API surface grew larger than this.
- *
- * The JSON-building logic itself lives in AppointmentJsonMapper rather
- * than inline here, so it can be unit tested directly (see
- * AppointmentJsonMapperTest) without needing a running server or a
- * mocking library.
- *
- * Example: GET /api/appointments/APT-000002
- *
- * NOTE (documented assumption): this endpoint is intentionally left
- * outside AuthenticationFilter's protected routes, since it represents
- * a machine-to-machine web service endpoint rather than a staff-facing
- * page. A production system would require its own authentication
- * (e.g. an API key), which was out of scope to implement here.
- */
 @WebServlet("/api/appointments/*")
 public class AppointmentApiServlet extends HttpServlet {
 

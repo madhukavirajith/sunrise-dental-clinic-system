@@ -30,9 +30,6 @@ public class BillDAOImpl implements BillDAO {
         return bill;
     }
 
-    // Checked before generating a new bill, so re-visiting the same
-    // appointment number doesn't try to insert a duplicate row (the
-    // schema has appointment_id UNIQUE on the bill table).
     @Override
     public Optional<Bill> findByAppointmentId(int appointmentId) throws SQLException {
         String sql = "SELECT bill_id, consultation_fee, treatment_cost, total_amount FROM bill WHERE appointment_id = ?";

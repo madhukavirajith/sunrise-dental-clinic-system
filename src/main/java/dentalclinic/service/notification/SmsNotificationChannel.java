@@ -3,16 +3,6 @@ package dentalclinic.service.notification;
 import dentalclinic.model.Appointment;
 import dentalclinic.model.Notification;
 
-/**
- * OBSERVER PATTERN (concrete observer).
- *
- * SIMULATED by design, not just by fallback: genuine SMS delivery
- * requires a paid third-party gateway account (e.g. Twilio) and its own
- * SDK/API credentials, which is both a real financial cost and outside
- * this assignment's allowed-dependency list. The system still
- * demonstrates the full SMS workflow - message construction and outcome
- * recording - which is what's being assessed.
- */
 public class SmsNotificationChannel implements NotificationChannel {
 
     private static final int SMS_CHARACTER_LIMIT = 160;
@@ -46,9 +36,6 @@ public class SmsNotificationChannel implements NotificationChannel {
                 appointment.getAppointmentDate(),
                 appointment.getAppointmentTime()
         );
-        // Real SMS is billed and truncated per-segment, so trimming to a
-        // realistic single-segment length is part of genuinely modelling
-        // the channel's constraints, not just decoration.
         if (message.length() > SMS_CHARACTER_LIMIT) {
             message = message.substring(0, SMS_CHARACTER_LIMIT - 3) + "...";
         }

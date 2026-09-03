@@ -1,12 +1,5 @@
 package dentalclinic.model;
 
-/**
- * Domain model representing an authorized staff member who can log in.
- * NOTE: passwordHash must never store a plain-text password - see
- * util.PasswordUtil for hashing (document your choice, e.g. BCrypt-style
- * salted hashing, and justify it in the report under the ETHICAL/data
- * protection requirement in the brief).
- */
 public class StaffUser {
 
     private int userId;

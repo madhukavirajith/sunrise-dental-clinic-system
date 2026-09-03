@@ -19,13 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-/**
- * Presentation layer - handles the "User Authentication (Login)"
- * requirement. Wired to StaffUserDAO and PasswordUtil, and also
- * demonstrates cookie usage: reads the previous login's "lastLoginTime"
- * cookie (to show a "welcome back" message once), then writes a fresh
- * one recording this login for next time.
- */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
@@ -53,8 +46,6 @@ public class LoginServlet extends HttpServlet {
             if (authenticated) {
                 StaffUser user = maybeUser.get();
 
-                // Read the PREVIOUS "last login" cookie before we overwrite
-                // it, so we can show it back to the user this one time.
                 Optional<String> previousLoginTime = CookieUtil.readCookie(request, "lastLoginTime");
 
                 HttpSession session = request.getSession(true);
@@ -62,9 +53,6 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("loggedInRole", user.getRole());
                 previousLoginTime.ifPresent(time -> session.setAttribute("previousLoginTime", time));
 
-                // Write a NEW cookie recording this login, for next time.
-                // 90-day expiry: long enough to be genuinely useful, but
-                // not forever - a deliberate, justifiable choice.
                 String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                 Cookie lastLoginCookie = CookieUtil.createCookie(
                         "lastLoginTime", now, 90 * 24 * 60 * 60, request.getContextPath() + "/"
