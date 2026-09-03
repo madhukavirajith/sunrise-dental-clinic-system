@@ -6,6 +6,7 @@
     Appointment a = (Appointment) request.getAttribute("appointment");
     String badgeClass = "SCHEDULED".equals(a.getStatus()) ? "badge-scheduled"
             : "COMPLETED".equals(a.getStatus()) ? "badge-completed" : "badge-cancelled";
+    Object patientAppointmentCount = request.getAttribute("patientAppointmentCount");
 %>
 
 <div class="page-header">
@@ -20,6 +21,9 @@
         <dt>Treatment</dt><dd><%= a.getTreatmentType().getName() %></dd>
         <dt>Date</dt><dd class="num"><%= a.getAppointmentDate() %></dd>
         <dt>Time</dt><dd class="num"><%= a.getAppointmentTime() %></dd>
+        <% if (patientAppointmentCount != null) { %>
+        <dt>Patient's Total Appointments</dt><dd class="num"><%= patientAppointmentCount %></dd>
+        <% } %>
     </dl>
 
     <div class="bill-actions">

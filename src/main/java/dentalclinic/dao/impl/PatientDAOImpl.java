@@ -43,14 +43,7 @@ public class PatientDAOImpl implements PatientDAO {
             ps.setInt(1, patientId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Patient patient = new Patient(
-                            rs.getInt("patient_id"),
-                            rs.getString("name"),
-                            rs.getString("address"),
-                            rs.getString("contact_number"),
-                            rs.getString("email")
-                    );
-                    return Optional.of(patient);
+                    return Optional.of(mapRow(rs));
                 }
             }
         }
@@ -89,5 +82,51 @@ public class PatientDAOImpl implements PatientDAO {
                 throw new SQLException("No patient found with id " + patientId + " to delete");
             }
         }
+    }
+
+    @Override
+    public Optional<Patient> findByContactNumber(String contactNumber) throws SQLException {
+        String sql = "SELECT patient_id, name, address, contact_number, email FROM patient WHERE contact_number = ?";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, contactNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public int countAppointments(int patientId) throws SQLException {
+        // Calls the MySQL FUNCTION directly inline in a SELECT - this is
+        // the distinguishing trait of a function vs. a stored procedure:
+        // it can be used as an expression, not just called as a
+        // standalone statement.
+        String sql = "SELECT GetPatientAppointmentCount(?) AS appointment_count";
+        try (Connection conn = DBConnectionManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, patientId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("appointment_count");
+                }
+            }
+        }
+        return 0;
+    }
+
+    private Patient mapRow(ResultSet rs) throws SQLException {
+        return new Patient(
+                rs.getInt("patient_id"),
+                rs.getString("name"),
+                rs.getString("address"),
+                rs.getString("contact_number"),
+                rs.getString("email")
+        );
     }
 }

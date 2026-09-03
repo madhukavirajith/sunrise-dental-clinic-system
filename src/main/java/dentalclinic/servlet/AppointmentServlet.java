@@ -30,10 +30,9 @@ import java.util.Optional;
 /**
  * Presentation layer - handles "Register New Appointment",
  * "Display Appointment Details" (search by appointment number), and the
- * appointments listing. Also demonstrates session/cookie usage
- * (recently viewed list, remembered last search) and, after a
- * successful registration, dispatches confirmation notifications via
- * NotificationDispatcher (Observer pattern).
+ * appointments listing. Also demonstrates session/cookie usage and
+ * dispatches confirmation notifications (Observer pattern) after a
+ * successful registration.
  */
 @WebServlet("/appointments/*")
 public class AppointmentServlet extends HttpServlet {
@@ -87,7 +86,19 @@ public class AppointmentServlet extends HttpServlet {
             Optional<Appointment> found = appointmentDAO.findByAppointmentNumber(appointmentNumber.trim());
             if (found.isPresent()) {
                 addToRecentlyViewed(request, appointmentNumber.trim());
-                request.setAttribute("appointment", found.get());
+                Appointment appointment = found.get();
+                request.setAttribute("appointment", appointment);
+
+                // Uses the GetPatientAppointmentCount MySQL FUNCTION via
+                // PatientDAO - non-critical, so a failure here doesn't
+                // block viewing the appointment itself.
+                try {
+                    int count = patientDAO.countAppointments(appointment.getPatient().getPatientId());
+                    request.setAttribute("patientAppointmentCount", count);
+                } catch (SQLException ignored) {
+                    // details page simply omits the count if this fails
+                }
+
                 request.getRequestDispatcher("/WEB-INF/views/appointment-details.jsp").forward(request, response);
             } else {
                 request.setAttribute("errorMessage", "No appointment found with number " + appointmentNumber);
@@ -137,7 +148,7 @@ public class AppointmentServlet extends HttpServlet {
         String patientName = request.getParameter("patientName");
         String address = request.getParameter("address");
         String contactNumber = request.getParameter("contactNumber");
-        String email = request.getParameter("email"); // optional - no validation error if blank
+        String email = request.getParameter("email");
         String dentistIdRaw = request.getParameter("dentistId");
         String treatmentTypeIdRaw = request.getParameter("treatmentTypeId");
         String dateRaw = request.getParameter("appointmentDate");
@@ -169,19 +180,32 @@ public class AppointmentServlet extends HttpServlet {
         }
 
         if (!fieldErrors.isEmpty()) {
+            setStickyFormAttributes(request, patientName, address, contactNumber, email);
             request.setAttribute("fieldErrors", fieldErrors);
-            request.setAttribute("patientName", patientName);
-            request.setAttribute("address", address);
-            request.setAttribute("contactNumber", contactNumber);
-            request.setAttribute("email", email);
             request.getRequestDispatcher("/WEB-INF/views/new-appointment.jsp").forward(request, response);
             return;
         }
 
         try {
-            Patient patient = new Patient(0, patientName, address, contactNumber);
-            patient.setEmail(ValidationUtil.isBlank(email) ? null : email.trim());
-            patientDAO.save(patient);
+            // Find-or-create: a returning patient (same contact number)
+            // reuses their existing record instead of a duplicate being
+            // created on every visit. This also makes
+            // GetPatientAppointmentCount() meaningful - without this,
+            // every patient row would only ever have exactly one
+            // appointment, since a new row was created every time.
+            Patient patient;
+            Optional<Patient> existingPatient = patientDAO.findByContactNumber(contactNumber.trim());
+            if (existingPatient.isPresent()) {
+                patient = existingPatient.get();
+                patient.setName(patientName);
+                patient.setAddress(address);
+                patient.setEmail(ValidationUtil.isBlank(email) ? null : email.trim());
+                patientDAO.update(patient);
+            } else {
+                patient = new Patient(0, patientName, address, contactNumber);
+                patient.setEmail(ValidationUtil.isBlank(email) ? null : email.trim());
+                patientDAO.save(patient);
+            }
 
             Dentist dentist = new Dentist(Integer.parseInt(dentistIdRaw), null, null);
             TreatmentType treatmentType = new TreatmentType(Integer.parseInt(treatmentTypeIdRaw), null, null);
@@ -192,9 +216,6 @@ public class AppointmentServlet extends HttpServlet {
             );
             appointmentDAO.save(appointment);
 
-            // Re-fetch with full JOIN data so the dispatcher's channels
-            // have real dentist/treatment names available for the
-            // message text, not just IDs.
             Appointment fullAppointment = appointmentDAO
                     .findByAppointmentNumber(appointment.getAppointmentNumber())
                     .orElse(appointment);
@@ -204,8 +225,25 @@ public class AppointmentServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/appointment-confirmation.jsp").forward(request, response);
 
         } catch (SQLException e) {
-            request.setAttribute("errorMessage", "A system error occurred while saving. Please try again.");
+            // The prevent_double_booking trigger (see
+            // database/advanced_features_v2.sql) rejects the insert with
+            // a specific message via SIGNAL - detect it here and show
+            // the user something actionable instead of a generic error.
+            String message = (e.getMessage() != null && e.getMessage().contains("already has an appointment"))
+                    ? "This dentist already has an appointment at the selected date and time. Please choose a different time."
+                    : "A system error occurred while saving. Please try again.";
+
+            setStickyFormAttributes(request, patientName, address, contactNumber, email);
+            request.setAttribute("errorMessage", message);
             request.getRequestDispatcher("/WEB-INF/views/new-appointment.jsp").forward(request, response);
         }
+    }
+
+    private void setStickyFormAttributes(HttpServletRequest request, String patientName,
+                                         String address, String contactNumber, String email) {
+        request.setAttribute("patientName", patientName);
+        request.setAttribute("address", address);
+        request.setAttribute("contactNumber", contactNumber);
+        request.setAttribute("email", email);
     }
 }
