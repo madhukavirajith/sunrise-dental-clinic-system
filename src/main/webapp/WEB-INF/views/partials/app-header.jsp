@@ -1,8 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <% // Included (not forwarded) into the calling page, so it shares the // same request/session objects. Each page
-        must set pageTitle and // activeNav as request attributes before including this file. String activeNav=(String)
-        request.getAttribute("activeNav"); if (activeNav==null) activeNav="" ; String pageTitle=(String)
-        request.getAttribute("pageTitle"); if (pageTitle==null) pageTitle="Sunrise Dental Clinic" ; %>
+<%
+    // Included (not forwarded) into the calling page, so it shares the
+    // same request/session objects. Each page must set pageTitle and
+    // activeNav as request attributes before including this file.
+    String activeNav = (String) request.getAttribute("activeNav");
+    if (activeNav == null) activeNav = "";
+    String pageTitle = (String) request.getAttribute("pageTitle");
+    if (pageTitle == null) pageTitle = "Sunrise Dental Clinic";
+%>
         <!DOCTYPE html>
         <html lang="en">
 
@@ -29,8 +34,7 @@
                     </div>
 
                     <div class="sidebar-nav">
-                        <a href="${pageContext.request.contextPath}/appointments/list" class="<%= "
-                            dashboard".equals(activeNav) ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/appointments/list" class='<%= "dashboard".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -40,16 +44,14 @@
                             </svg>
                             Appointments
                         </a>
-                        <a href="${pageContext.request.contextPath}/appointments/new" class="<%= "
-                            new-appointment".equals(activeNav) ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/appointments/new" class='<%= "new-appointment".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M12 5v14M5 12h14" />
                             </svg>
                             New Appointment
                         </a>
-                        <a href="${pageContext.request.contextPath}/appointments/search" class="<%= "
-                            search".equals(activeNav) ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/appointments/search" class='<%= "search".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <circle cx="11" cy="11" r="7" />
@@ -60,8 +62,7 @@
 
                         <div class="sidebar-divider"></div>
 
-                        <a href="${pageContext.request.contextPath}/billing" class="<%= " billing".equals(activeNav)
-                            ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/billing" class='<%= "billing".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -69,16 +70,14 @@
                             </svg>
                             Billing
                         </a>
-                        <a href="${pageContext.request.contextPath}/reports" class="<%= " reports".equals(activeNav)
-                            ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/reports" class='<%= "reports".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M4 19V9M12 19V5M20 19v-7" />
                             </svg>
                             Reports
                         </a>
-                        <a href="${pageContext.request.contextPath}/notifications" class="<%= "
-                            notifications".equals(activeNav) ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/notifications" class='<%= "notifications".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -86,8 +85,7 @@
                             </svg>
                             Notifications
                         </a>
-                        <a href="${pageContext.request.contextPath}/help.jsp" class="<%= " help".equals(activeNav)
-                            ? "active" : "" %>">
+                        <a href="${pageContext.request.contextPath}/help.jsp" class='<%= "help".equals(activeNav) ? "active" : "" %>'>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <circle cx="12" cy="12" r="9" />
